@@ -312,7 +312,7 @@ int main()
                     if(is_voidf(&cursor, ev[i].code)) {
                         printf("VOIDF IS COMING\n");
                         voidf_count += 1;
-                        // TODO: quake-style combo message
+                        // TODO(#6): quake-style combo message
                         popups_new("voidf");
                     }
                 }
