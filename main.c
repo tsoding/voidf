@@ -154,6 +154,65 @@ Device devices[DEVICES_CAPACITY];
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+#define FPS 60
+#define DELTA_TIME (1.0f / FPS)
+
+typedef struct {
+    char text[256];
+    float a;
+} Popup;
+
+#define POPUPS_CAPACITY 32
+Popup popups[POPUPS_CAPACITY] = {0};
+
+#define POPUP_FADEOUT_RATE 1.5f
+#define POPUP_FADEOUT_DISTANCE 150
+#define POPUP_SWIDTH 20
+#define POPUP_SHEIGHT 20
+#define POPUP_COLOR ((SDL_Color) {255, 255, 255, 255})
+
+void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
+{
+    for (size_t i = 0; i < POPUPS_CAPACITY; ++i) {
+        if (popups[i].a > 0.0) {
+            int w = 0;
+            int h = 0;
+            bitmap_font_text_size(popups[i].text, POPUP_SWIDTH, POPUP_SHEIGHT, &w, &h);
+            const int x = SCREEN_WIDTH / 2 - w / 2;
+            const int y = SCREEN_HEIGHT / 2 - h / 2 - (int) floorf((1.0 - popups[i].a) * POPUP_FADEOUT_DISTANCE);
+
+            SDL_Color color = POPUP_COLOR;
+            color.a = (Uint8) floorf(255.0f * popups[i].a);
+            bitmap_font_render(
+                    font,
+                    renderer,
+                    x, y,
+                    POPUP_SWIDTH, POPUP_SHEIGHT,
+                    color,
+                    popups[i].text);
+        }
+    }
+}
+
+void popups_update(float dt)
+{
+    for (size_t i = 0; i < POPUPS_CAPACITY; ++i) {
+        if (popups[i].a > 0) {
+            popups[i].a -= dt * POPUP_FADEOUT_RATE;
+        }
+    }
+}
+
+void popups_new(const char *text)
+{
+    for (size_t i = 0; i < POPUPS_CAPACITY; ++i) {
+        if (popups[i].a <= 0) {
+            snprintf(popups[i].text, sizeof(popups[i].text), "%s", text);
+            popups[i].a = 1.0f;
+            return;
+        }
+    }
+}
 
 int main()
 {
@@ -253,10 +312,14 @@ int main()
                     if(is_voidf(&cursor, ev[i].code)) {
                         printf("VOIDF IS COMING\n");
                         voidf_count += 1;
+                        // TODO: quake-style combo message
+                        popups_new("voidf");
                     }
                 }
             }
         }
+
+        popups_update(DELTA_TIME);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
@@ -277,7 +340,9 @@ int main()
                            (SDL_Color) {255, 255, 255, 255},
                            voidf_buffer);
 
-        SDL_Delay(10);
+        popups_render(renderer, &font);
+
+        SDL_Delay((int) floorf(DELTA_TIME * 1000.0f));
         SDL_RenderPresent(renderer);
     }
 
