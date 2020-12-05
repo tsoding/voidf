@@ -112,34 +112,84 @@ static int is_event_device(const struct dirent *dir)
     return strncmp(EVENT_DEV_NAME, dir->d_name, 5) == 0;
 }
 
-void scan_devices(void)
+typedef struct {
+    struct dirent entry;
+    char name[256];
+} Device;
+
+size_t scan_devices(Device *devices, size_t capacity)
 {
     struct dirent **namelist;
 
     int ndev = scandir(DEV_INPUT_EVENT, &namelist, is_event_device, versionsort);
-    printf("Found %d input devices\n", ndev);
 
-    for (int i = 0; i < ndev; ++i) {
+    size_t size = 0;
+    for (int i = 0; i < ndev && size < capacity; ++i) {
         char fname[512];
         snprintf(fname, sizeof(fname),
                  "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
 
         int fd = open(fname, O_RDONLY);
-        if (fd < 0) {
-            printf("%s: ERROR: could not open the file\n", fname);
-        } else {
-            char name[256] = "???";
-            ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-            printf("%s: %s\n", fname, name);
+        if (fd >= 0) {
+            ioctl(fd, EVIOCGNAME(sizeof(devices[size].name)), devices[size].name);
+            memcpy(&devices[size].entry, namelist[i], sizeof(devices[size].entry));
+            size += 1;
             close(fd);
         }
-
         free(namelist[i]);
     }
+    free(namelist);
+
+    return size;
 }
+
+#define DEVICES_CAPACITY 256
+Device devices[DEVICES_CAPACITY];
 
 int main()
 {
+    const size_t devices_size = scan_devices(devices, DEVICES_CAPACITY);
+
+    printf("Found %lu devices\n", devices_size);
+    if (devices_size == 0) {
+        printf("Most likely voidf does not have enough permissions to read files from %s\n", DEV_INPUT_EVENT);
+        exit(1);
+    }
+
+    for (size_t i = 0; i < devices_size; ++i) {
+        printf("%lu: %s\n", i, devices[i].name);
+    }
+
+    printf("Which one is your keyboard? [0-%lu] ", devices_size - 1);
+
+    char input[256];
+    fgets(input, sizeof(input), stdin);
+    int selected_device = atoi(input);
+
+    if (selected_device < 0 || selected_device >= (int) devices_size) {
+        fprintf(stdout, "ERROR: Incorrect device number\n");
+        exit(1);
+    }
+
+    printf("Selected %d: %s\n", selected_device, devices[selected_device].name);
+
+    char filename[512];
+    snprintf(filename, sizeof(filename), "%s/%s", DEV_INPUT_EVENT, 
+             devices[selected_device].entry.d_name);
+
+    printf("File path of the Device: %s\n", filename);
+
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "ERROR: Could not open file %s\n", filename);
+        exit(1);
+    }
+
+    {
+        int flags = fcntl(fd, F_GETFL, 0);
+        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "ERROR: Could not initialize SDL: %s\n", SDL_GetError());
         exit(1);
@@ -159,20 +209,6 @@ int main()
     if (renderer == NULL) {
         fprintf(stderr, "ERROR: Could not initialize SDL: %s\n", SDL_GetError());
         exit(1);
-    }
-
-    // TODO(#2): filename is hardcoded
-    const char *filename = "/dev/input/event14";
-
-    int fd = open(filename, O_RDONLY);
-    if (fd < 0) {
-        printf("Could not open file %s\n", filename);
-        exit(1);
-    }
-
-    {
-        int flags = fcntl(fd, F_GETFL, 0);
-        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
 
     // TODO(#3): charmap-oldschool.bmp should be baked into the executable
