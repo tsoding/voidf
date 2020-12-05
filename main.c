@@ -162,7 +162,7 @@ int main()
         exit(1);
     }
 
-    // TODO: filename is hardcoded
+    // TODO(#2): filename is hardcoded
     const char *filename = "/dev/input/event14";
 
     int fd = open(filename, O_RDONLY);
