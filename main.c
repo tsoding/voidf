@@ -121,8 +121,6 @@ void scan_devices(void)
 
     for (int i = 0; i < ndev; ++i) {
         char fname[512];
-        char name[256] = "???";
-
         snprintf(fname, sizeof(fname),
                  "%s/%s", DEV_INPUT_EVENT, namelist[i]->d_name);
 
@@ -130,6 +128,7 @@ void scan_devices(void)
         if (fd < 0) {
             printf("%s: ERROR: could not open the file\n", fname);
         } else {
+            char name[256] = "???";
             ioctl(fd, EVIOCGNAME(sizeof(name)), name);
             printf("%s: %s\n", fname, name);
             close(fd);
