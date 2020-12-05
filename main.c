@@ -1,4 +1,4 @@
-// TODO: get rid of _GNU_SOURCE for more portable code
+// TODO(#1): get rid of _GNU_SOURCE for more portable code
 #define _GNU_SOURCE
 
 #include <stdio.h>
