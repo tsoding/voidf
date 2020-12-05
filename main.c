@@ -214,7 +214,7 @@ int main()
 
         snprintf(voidf_buffer, sizeof(voidf_buffer), "%d", voidf_count);
 
-        // TODO: voidf counter is ugly
+        // TODO(#4): voidf counter is ugly
         bitmap_font_render(&font,
                            renderer,
                            0, 0,
