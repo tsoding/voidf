@@ -179,10 +179,10 @@ void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
             int h = 0;
             bitmap_font_text_size(popups[i].text, POPUP_SWIDTH, POPUP_SHEIGHT, &w, &h);
             const int x = SCREEN_WIDTH / 2 - w / 2;
-            const int y = SCREEN_HEIGHT / 2 - h / 2 - (int) floorf((1.0 - popups[i].a) * POPUP_FADEOUT_DISTANCE);
+            const int y = SCREEN_HEIGHT / 2 - h / 2 - (int) floorf((1.0 - popups[i].a * popups[i].a) * POPUP_FADEOUT_DISTANCE);
 
             SDL_Color color = POPUP_COLOR;
-            color.a = (Uint8) floorf(255.0f * popups[i].a);
+            color.a = (Uint8) floorf(255.0f * popups[i].a * popups[i].a);
             bitmap_font_render(
                     font,
                     renderer,
