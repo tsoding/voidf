@@ -65,10 +65,16 @@ Bitmap_Font bitmap_font_from_file(SDL_Renderer *renderer, const char *file_path)
     return result;
 }
 
+void bitmap_font_text_size(const char *cstr, int sw, int sh, int *w, int *h)
+{
+    *w = strlen(cstr) * BITMAP_FONT_CHAR_WIDTH * sw;
+    *h = BITMAP_FONT_CHAR_HEIGHT * sh;
+}
+
 void bitmap_font_render(Bitmap_Font *font,
                         SDL_Renderer *renderer,
                         int x, int y,
-                        int w, int h,
+                        int sw, int sh,
                         SDL_Color color,
                         const char *cstr)
 {
@@ -80,10 +86,10 @@ void bitmap_font_render(Bitmap_Font *font,
     for (int col = 0; (size_t) col < n; ++col) {
         const SDL_Rect src_rect = bitmap_font_char_rect(font, cstr[col]);
         const SDL_Rect dest_rect = {
-            x + BITMAP_FONT_CHAR_WIDTH  * col * w,
-            y + BITMAP_FONT_CHAR_HEIGHT       * h,
-            src_rect.w * w,
-            src_rect.h * h
+            x + BITMAP_FONT_CHAR_WIDTH  * col * sw,
+            y,
+            src_rect.w * sw,
+            src_rect.h * sh
         };
         SDL_RenderCopy(renderer, font->bitmap, &src_rect, &dest_rect);
     }
@@ -146,6 +152,9 @@ size_t scan_devices(Device *devices, size_t capacity)
 #define DEVICES_CAPACITY 256
 Device devices[DEVICES_CAPACITY];
 
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
 int main()
 {
     const size_t devices_size = scan_devices(devices, DEVICES_CAPACITY);
@@ -198,7 +207,8 @@ int main()
     SDL_Window * const window = SDL_CreateWindow(
         "V̳͙̥̹̟͗̀̎̓͌͐́O̘̞͇̞̣͇͕͂͠I͙̋͐̍͂̀D̶͕̩̦̲͙F̟̖̮ͩ̏ͥ̂ͨ͠ ͍̰̫̯͙̯ͨ̉ͤ̈̿ͭI̤͍̲̯ͤ̎̀͝S̴̻͇̳̗̩ͧ̆ ̭̘̦ͭ͒Ĉ̸̰̼̤̖̲O̹̭̞̺̻͚̣̒M̪͓̗̤͋͢Ĩ͔̗̣̻̄̏̏̏̚N̳̦̂ͯ̅͂̓̈́G͈̣",
         0, 0,
-        800, 600, SDL_WINDOW_RESIZABLE);
+        SCREEN_WIDTH, SCREEN_HEIGHT, 
+        SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
         fprintf(stderr, "ERROR: Could not initialize SDL: %s\n", SDL_GetError());
         exit(1);
@@ -210,6 +220,10 @@ int main()
         fprintf(stderr, "ERROR: Could not initialize SDL: %s\n", SDL_GetError());
         exit(1);
     }
+
+    SDL_RenderSetLogicalSize(renderer,
+            (int) SCREEN_WIDTH,
+            (int) SCREEN_HEIGHT);
 
     // TODO(#3): charmap-oldschool.bmp should be baked into the executable
     Bitmap_Font font = bitmap_font_from_file(renderer, "./charmap-oldschool.bmp");
@@ -244,16 +258,22 @@ int main()
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         snprintf(voidf_buffer, sizeof(voidf_buffer), "%d", voidf_count);
 
-        // TODO(#4): voidf counter is ugly
+        const int sw = 10 * 3;
+        const int sh = 10 * 3;
+        int w = 0;
+        int h = 0;
+        bitmap_font_text_size(voidf_buffer, sw, sh, &w, &h);
+        const int x = SCREEN_WIDTH / 2 - w / 2;
+        const int y = SCREEN_HEIGHT / 2 - h / 2;
         bitmap_font_render(&font,
                            renderer,
-                           0, 0,
-                           10, 10,
+                           x, y,
+                           sw, sh,
                            (SDL_Color) {255, 255, 255, 255},
                            voidf_buffer);
 
