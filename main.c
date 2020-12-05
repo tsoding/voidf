@@ -176,7 +176,7 @@ int main()
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
 
-    // TODO: charmap-oldschool.bmp should be baked into the executable
+    // TODO(#3): charmap-oldschool.bmp should be baked into the executable
     Bitmap_Font font = bitmap_font_from_file(renderer, "./charmap-oldschool.bmp");
 
     int quit = 0;
