@@ -19,6 +19,18 @@ The application supports temporary privilege escalation via setuid/setgid bits. 
 # chmod 4755 /usr/local/bin/voidf
 ```
 
+### setgid example on Debian
+
+On my Debian Stale 10 I have a group called `input` that has the access to `/dev/input/*` files. So this is what I do on my machine:
+
+```
+# cp voidf /usr/local/bin
+# chown root:input /usr/local/bin/voidf
+# chmod g+s /usr/local/bin/voidf
+```
+
+This way voidf is never ran with root privileges. It is only ran with temporary `input` group privilege just to open the input device file.
+
 ## References
 
 - https://github.com/freedesktop-unofficial-mirror/evtest/blob/b8343ec1124da18bdabcc04809a8731b9e39295d/evtest.c
