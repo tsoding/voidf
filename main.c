@@ -247,15 +247,10 @@ int main()
 
     printf("File path of the Device: %s\n", filename);
 
-    int fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
         fprintf(stderr, "ERROR: Could not open file %s\n", filename);
         exit(1);
-    }
-
-    {
-        int flags = fcntl(fd, F_GETFL, 0);
-        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
