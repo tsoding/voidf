@@ -34,3 +34,4 @@ This way voidf is never ran with root privileges. It is only ran with temporary 
 ## References
 
 - https://github.com/freedesktop-unofficial-mirror/evtest/blob/b8343ec1124da18bdabcc04809a8731b9e39295d/evtest.c
+- https://www.gnu.org/software/libc/manual/html_node/Setuid-Program-Example.html
