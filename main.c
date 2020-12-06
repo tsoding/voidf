@@ -13,14 +13,31 @@
 
 #include <SDL2/SDL.h>
 
+#include "./image.h"
+
 static const __u16 voidf[] = {KEY_V, KEY_O, KEY_I, KEY_D, KEY_F};
 static const size_t voidf_count = sizeof(voidf) / sizeof(voidf[0]);
 
-SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
-                                        const char *image_filepath,
-                                        SDL_Color color_key)
+SDL_Surface *image_as_surface()
 {
-    SDL_Surface *image_surface = SDL_LoadBMP(image_filepath);
+    SDL_Surface* image_surface =
+        SDL_CreateRGBSurfaceFrom(
+                image,
+                (int) image_width,
+                (int) image_height,
+                32,
+                (int) image_width * 4,
+                0x000000FF,
+                0x0000FF00,
+                0x00FF0000,
+                0xFF000000);
+    return image_surface;
+}
+
+SDL_Texture *image_as_texture(SDL_Renderer *renderer,
+                              SDL_Color color_key)
+{
+    SDL_Surface *image_surface = image_as_surface();
 
     SDL_SetColorKey(
         image_surface,
@@ -59,10 +76,10 @@ SDL_Rect bitmap_font_char_rect(Bitmap_Font *font, char x)
     }
 }
 
-Bitmap_Font bitmap_font_from_file(SDL_Renderer *renderer, const char *file_path)
+Bitmap_Font image_as_bitmap_font(SDL_Renderer *renderer)
 {
     Bitmap_Font result = {0};
-    result.bitmap = load_texture_from_bmp_file(renderer, file_path, (SDL_Color) {0, 0, 0, 255});
+    result.bitmap = image_as_texture(renderer, (SDL_Color) {0, 0, 0, 255});
     return result;
 }
 
@@ -292,7 +309,7 @@ int main()
             (int) SCREEN_HEIGHT);
 
     // TODO(#3): charmap-oldschool.bmp should be baked into the executable
-    Bitmap_Font font = bitmap_font_from_file(renderer, "./charmap-oldschool.bmp");
+    Bitmap_Font font = image_as_bitmap_font(renderer);
 
     int quit = 0;
     struct input_event ev[64];
