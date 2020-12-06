@@ -308,7 +308,6 @@ int main()
             (int) SCREEN_WIDTH,
             (int) SCREEN_HEIGHT);
 
-    // TODO(#3): charmap-oldschool.bmp should be baked into the executable
     Bitmap_Font font = image_as_bitmap_font(renderer);
 
     int quit = 0;
