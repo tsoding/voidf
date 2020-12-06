@@ -15,22 +15,28 @@
 
 #include "./image.h"
 
+#define ARRAY_LEN(xs) (sizeof(xs) / sizeof(xs[0]))
+
 #define BITMAP_FONT_ROW_SIZE    18
 #define BITMAP_FONT_CHAR_WIDTH  7
 #define BITMAP_FONT_CHAR_HEIGHT 9
+#define COUNTER_SWIDTH 30
+#define COUNTER_SHEIGHT 30
+#define COUNTER_HEIGHT (COUNTER_SWIDTH * BITMAP_FONT_CHAR_HEIGHT)
 #define DEV_INPUT_EVENT "/dev/input"
 #define EVENT_DEV_NAME "event"
 #define DEVICES_CAPACITY 256
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1024
+#define SCREEN_HEIGHT 768
 #define FPS 60
 #define DELTA_TIME (1.0f / FPS)
 #define POPUPS_CAPACITY 32
-#define POPUP_FADEOUT_RATE 1.5f
-#define POPUP_FADEOUT_DISTANCE 150
-#define POPUP_SWIDTH 20
-#define POPUP_SHEIGHT 20
+#define POPUP_FADEOUT_RATE 0.75f
+#define POPUP_FADEOUT_DISTANCE 200
+#define POPUP_SWIDTH 10
+#define POPUP_SHEIGHT 10
 #define POPUP_COLOR ((SDL_Color) {255, 255, 255, 255})
+#define COMBO_PERIOD 1.0 
 
 static const __u16 voidf[] = {KEY_V, KEY_O, KEY_I, KEY_D, KEY_F};
 static const size_t voidf_count = sizeof(voidf) / sizeof(voidf[0]);
@@ -194,7 +200,7 @@ void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
             int h = 0;
             bitmap_font_text_size(popups[i].text, POPUP_SWIDTH, POPUP_SHEIGHT, &w, &h);
             const int x = SCREEN_WIDTH / 2 - w / 2;
-            const int y = SCREEN_HEIGHT / 2 - h / 2 - (int) floorf((1.0 - popups[i].a * popups[i].a) * POPUP_FADEOUT_DISTANCE);
+            const int y = SCREEN_HEIGHT / 2 - h / 2 - COUNTER_HEIGHT / 3 - (int) floorf((1.0 - popups[i].a * popups[i].a) * POPUP_FADEOUT_DISTANCE);
 
             SDL_Color color = POPUP_COLOR;
             color.a = (Uint8) floorf(255.0f * popups[i].a * popups[i].a);
@@ -228,6 +234,22 @@ void popups_new(const char *text)
         }
     }
 }
+
+// TODO: red color and shaking for longer combos
+const char *combo_phrases[] = {
+    "voidf",
+    "Double voidf",
+    "Triple voidf",
+    "Dominating",
+    "Rampage",
+    "Mega voidf",
+    "Unstoppable",
+    "Wicked Sick",
+    "Monster voidf",
+    "GODLIKE",
+    "BEYOND GODLIKE",
+};
+size_t current_phrase = 0;
 
 int main()
 {
@@ -312,6 +334,7 @@ int main()
     size_t cursor = 0;
     int voidf_count = 0;
     char voidf_buffer[1024];
+    float combo_timeout = 0.0f;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -331,9 +354,16 @@ int main()
                 if (ev[i].type == EV_KEY && ev[i].value == 0) {
                     if(is_voidf(&cursor, ev[i].code)) {
                         printf("VOIDF IS COMING\n");
+                        if (combo_timeout < COMBO_PERIOD) {
+                            if (current_phrase < ARRAY_LEN(combo_phrases) - 1) {
+                                current_phrase += 1;
+                            }
+                        } else {
+                            current_phrase = 0;
+                        }
+                        combo_timeout = 0.0f;
                         voidf_count += 1;
-                        // TODO(#6): quake-style combo message
-                        popups_new("voidf");
+                        popups_new(combo_phrases[current_phrase]);
                     }
                 }
             }
@@ -364,6 +394,8 @@ int main()
 
         SDL_Delay((int) floorf(DELTA_TIME * 1000.0f));
         SDL_RenderPresent(renderer);
+
+        combo_timeout += DELTA_TIME;
     }
 
     close(fd);
