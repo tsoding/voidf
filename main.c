@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <linux/input.h>
+#include <errno.h>
 
 #include <SDL2/SDL.h>
 
@@ -216,6 +217,9 @@ void popups_new(const char *text)
 
 int main()
 {
+    uid_t ruid = getuid();
+    gid_t rgid = getgid();
+
     const size_t devices_size = scan_devices(devices, DEVICES_CAPACITY);
 
     printf("Found %lu devices\n", devices_size);
@@ -247,15 +251,18 @@ int main()
 
     printf("File path of the Device: %s\n", filename);
 
-    int fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
-        fprintf(stderr, "ERROR: Could not open file %s\n", filename);
+        fprintf(stderr, "ERROR: Could not open file %s: %s\n", filename, strerror(errno));
         exit(1);
     }
 
-    {
-        int flags = fcntl(fd, F_GETFL, 0);
-        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    if (seteuid(ruid) < 0) {
+        fprintf(stderr, "WARNING: Could not set Effective UID to the real one: %s\n", strerror(errno));
+    }
+
+    if (setegid(rgid) < 0) {
+        fprintf(stderr, "WARNING: Could not set Effective GID to the real one: %s\n", strerror(errno));
     }
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
