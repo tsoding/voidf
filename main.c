@@ -235,7 +235,7 @@ void popups_new(const char *text)
     }
 }
 
-// TODO: red color and shaking for longer combos
+// TODO(#13): red color and shaking for longer combos
 const char *combo_phrases[] = {
     "voidf",
     "Double voidf",
