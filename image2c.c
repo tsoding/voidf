@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // TODO: inclusion guards and the array name are not customizable
+    // TODO(#11): include guards and the array name are not customizable
     printf("#ifndef IMAGE_H_\n");
     printf("#define IMAGE_H_\n");
     printf("size_t image_width = %d;\n", x);
