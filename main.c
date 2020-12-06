@@ -15,6 +15,23 @@
 
 #include "./image.h"
 
+#define BITMAP_FONT_ROW_SIZE    18
+#define BITMAP_FONT_CHAR_WIDTH  7
+#define BITMAP_FONT_CHAR_HEIGHT 9
+#define DEV_INPUT_EVENT "/dev/input"
+#define EVENT_DEV_NAME "event"
+#define DEVICES_CAPACITY 256
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+#define FPS 60
+#define DELTA_TIME (1.0f / FPS)
+#define POPUPS_CAPACITY 32
+#define POPUP_FADEOUT_RATE 1.5f
+#define POPUP_FADEOUT_DISTANCE 150
+#define POPUP_SWIDTH 20
+#define POPUP_SHEIGHT 20
+#define POPUP_COLOR ((SDL_Color) {255, 255, 255, 255})
+
 static const __u16 voidf[] = {KEY_V, KEY_O, KEY_I, KEY_D, KEY_F};
 static const size_t voidf_count = sizeof(voidf) / sizeof(voidf[0]);
 
@@ -52,10 +69,6 @@ SDL_Texture *image_as_texture(SDL_Renderer *renderer,
     SDL_FreeSurface(image_surface);
     return image_texture;
 }
-
-#define BITMAP_FONT_ROW_SIZE    18
-#define BITMAP_FONT_CHAR_WIDTH  7
-#define BITMAP_FONT_CHAR_HEIGHT 9
 
 typedef struct {
     SDL_Texture *bitmap;
@@ -128,9 +141,6 @@ int is_voidf(size_t *cursor, __u16 x)
     return 0;
 }
 
-#define DEV_INPUT_EVENT "/dev/input"
-#define EVENT_DEV_NAME "event"
-
 static int is_event_device(const struct dirent *dir)
 {
     return strncmp(EVENT_DEV_NAME, dir->d_name, 5) == 0;
@@ -167,27 +177,14 @@ size_t scan_devices(Device *devices, size_t capacity)
     return size;
 }
 
-#define DEVICES_CAPACITY 256
 Device devices[DEVICES_CAPACITY];
-
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-#define FPS 60
-#define DELTA_TIME (1.0f / FPS)
 
 typedef struct {
     char text[256];
     float a;
 } Popup;
 
-#define POPUPS_CAPACITY 32
 Popup popups[POPUPS_CAPACITY] = {0};
-
-#define POPUP_FADEOUT_RATE 1.5f
-#define POPUP_FADEOUT_DISTANCE 150
-#define POPUP_SWIDTH 20
-#define POPUP_SHEIGHT 20
-#define POPUP_COLOR ((SDL_Color) {255, 255, 255, 255})
 
 void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
