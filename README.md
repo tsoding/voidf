@@ -21,7 +21,7 @@ The application supports temporary privilege escalation via setuid/setgid bits. 
 
 ### setgid example on Debian
 
-On my Debian Stale 10 I have a group called `input` that has the access to `/dev/input/*` files. So this is what I do on my machine:
+On my Debian Stable 10 I have a group called `input` that has the access to `/dev/input/*` files. So this is what I do on my machine:
 
 ```
 # cp voidf /usr/local/bin
