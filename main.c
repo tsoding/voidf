@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -253,6 +254,37 @@ const char *combo_phrases[] = {
 };
 size_t current_phrase = 0;
 
+// NOTE: if we will have more undo-able actions we may wanna replace this int with a specialized Undo_Action struct
+typedef int Undo_History_Item;
+
+#define UNDO_HISTORY_CAPACTIY 8
+typedef struct {
+    Undo_History_Item items[UNDO_HISTORY_CAPACTIY];
+    size_t begin;
+    size_t size;
+} Undo_History;
+
+void undo_history_push(Undo_History *uh, size_t value)
+{
+    uh->items[(uh->begin + uh->size) % UNDO_HISTORY_CAPACTIY] = value;
+    if (uh->size < UNDO_HISTORY_CAPACTIY) {
+        uh->size += 1;
+    } else {
+        uh->begin = (uh->begin + 1) % UNDO_HISTORY_CAPACTIY;
+    }
+}
+
+bool undo_history_pop(Undo_History *uh, int *value)
+{
+    if (uh->size > 0) {
+        *value = uh->items[(uh->begin + uh->size - 1) % UNDO_HISTORY_CAPACTIY];
+        uh->size -= 1;
+        return true;
+    }
+
+    return false;
+}
+
 int main()
 {
     uid_t ruid = getuid();
@@ -334,6 +366,7 @@ int main()
     int quit = 0;
     struct input_event ev[64];
     size_t cursor = 0;
+    Undo_History voidf_undo_history = {0};
     int voidf_count = 0;
     char voidf_buffer[1024];
     float combo_timeout = 0.0f;
@@ -343,6 +376,25 @@ int main()
             switch (event.type) {
             case SDL_QUIT: {
                 quit = 1;
+            }
+            break;
+
+            case SDL_KEYDOWN: {
+                switch (event.key.keysym.sym) {
+                case SDLK_F5: {
+                    undo_history_push(&voidf_undo_history, voidf_count);
+                    voidf_count = 0;
+                    popups_new("reset");
+                } break;
+
+                case SDLK_z: {
+                    if (event.key.keysym.mod & KMOD_CTRL) {
+                        if (undo_history_pop(&voidf_undo_history, &voidf_count)) {
+                            popups_new("undo");
+                        }
+                    }
+                } break;
+                }
             }
             break;
             }
