@@ -31,6 +31,17 @@ On my Debian Stale 10 I have a group called `input` that has the access to `/dev
 
 This way voidf is never ran with root privileges. It is only ran with temporary `input` group privilege just to open the input device file.
 
+## Controls
+
+To increment the counter you have to type the sequence of characters `voidf`. Focus on the main window is not required.
+
+The following actions do require the window focus tho:
+
+| Shortcut | Description |
+| --- | --- |
+| <kbd>F5</kbd> | Reset the counter |
+| <kbd>Ctrl + Z</kbd> | Undo the counter reset |
+
 ## References
 
 - https://github.com/freedesktop-unofficial-mirror/evtest/blob/b8343ec1124da18bdabcc04809a8731b9e39295d/evtest.c
