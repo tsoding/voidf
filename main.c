@@ -36,7 +36,7 @@
 #define POPUP_SWIDTH 10
 #define POPUP_SHEIGHT 10
 #define POPUP_COLOR ((SDL_Color) {255, 255, 255, 255})
-#define COMBO_PERIOD 1.0 
+#define COMBO_PERIOD 1.0
 
 static const __u16 voidf[] = {KEY_V, KEY_O, KEY_I, KEY_D, KEY_F};
 static const size_t voidf_count = sizeof(voidf) / sizeof(voidf[0]);
@@ -45,15 +45,15 @@ SDL_Surface *image_as_surface()
 {
     SDL_Surface* image_surface =
         SDL_CreateRGBSurfaceFrom(
-                image,
-                (int) image_width,
-                (int) image_height,
-                32,
-                (int) image_width * 4,
-                0x000000FF,
-                0x0000FF00,
-                0x00FF0000,
-                0xFF000000);
+            image,
+            (int) image_width,
+            (int) image_height,
+            32,
+            (int) image_width * 4,
+            0x000000FF,
+            0x0000FF00,
+            0x00FF0000,
+            0xFF000000);
     return image_surface;
 }
 
@@ -98,7 +98,9 @@ SDL_Rect bitmap_font_char_rect(Bitmap_Font *font, char x)
 Bitmap_Font image_as_bitmap_font(SDL_Renderer *renderer)
 {
     Bitmap_Font result = {0};
-    result.bitmap = image_as_texture(renderer, (SDL_Color) {0, 0, 0, 255});
+    result.bitmap = image_as_texture(renderer, (SDL_Color) {
+        0, 0, 0, 255
+    });
     return result;
 }
 
@@ -205,12 +207,12 @@ void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
             SDL_Color color = POPUP_COLOR;
             color.a = (Uint8) floorf(255.0f * popups[i].a * popups[i].a);
             bitmap_font_render(
-                    font,
-                    renderer,
-                    x, y,
-                    POPUP_SWIDTH, POPUP_SHEIGHT,
-                    color,
-                    popups[i].text);
+                font,
+                renderer,
+                x, y,
+                POPUP_SWIDTH, POPUP_SHEIGHT,
+                color,
+                popups[i].text);
         }
     }
 }
@@ -282,7 +284,7 @@ int main()
     printf("Selected %d: %s\n", selected_device, devices[selected_device].name);
 
     char filename[512];
-    snprintf(filename, sizeof(filename), "%s/%s", DEV_INPUT_EVENT, 
+    snprintf(filename, sizeof(filename), "%s/%s", DEV_INPUT_EVENT,
              devices[selected_device].entry.d_name);
 
     printf("File path of the Device: %s\n", filename);
@@ -307,10 +309,10 @@ int main()
     }
 
     SDL_Window * const window = SDL_CreateWindow(
-        "V̳͙̥̹̟͗̀̎̓͌͐́O̘̞͇̞̣͇͕͂͠I͙̋͐̍͂̀D̶͕̩̦̲͙F̟̖̮ͩ̏ͥ̂ͨ͠ ͍̰̫̯͙̯ͨ̉ͤ̈̿ͭI̤͍̲̯ͤ̎̀͝S̴̻͇̳̗̩ͧ̆ ̭̘̦ͭ͒Ĉ̸̰̼̤̖̲O̹̭̞̺̻͚̣̒M̪͓̗̤͋͢Ĩ͔̗̣̻̄̏̏̏̚N̳̦̂ͯ̅͂̓̈́G͈̣",
-        0, 0,
-        SCREEN_WIDTH, SCREEN_HEIGHT, 
-        SDL_WINDOW_RESIZABLE);
+                                    "V̳͙̥̹̟͗̀̎̓͌͐́O̘̞͇̞̣͇͕͂͠I͙̋͐̍͂̀D̶͕̩̦̲͙F̟̖̮ͩ̏ͥ̂ͨ͠ ͍̰̫̯͙̯ͨ̉ͤ̈̿ͭI̤͍̲̯ͤ̎̀͝S̴̻͇̳̗̩ͧ̆ ̭̘̦ͭ͒Ĉ̸̰̼̤̖̲O̹̭̞̺̻͚̣̒M̪͓̗̤͋͢Ĩ͔̗̣̻̄̏̏̏̚N̳̦̂ͯ̅͂̓̈́G͈̣",
+                                    0, 0,
+                                    SCREEN_WIDTH, SCREEN_HEIGHT,
+                                    SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
         fprintf(stderr, "ERROR: Could not initialize SDL: %s\n", SDL_GetError());
         exit(1);
@@ -324,8 +326,8 @@ int main()
     }
 
     SDL_RenderSetLogicalSize(renderer,
-            (int) SCREEN_WIDTH,
-            (int) SCREEN_HEIGHT);
+                             (int) SCREEN_WIDTH,
+                             (int) SCREEN_HEIGHT);
 
     Bitmap_Font font = image_as_bitmap_font(renderer);
 
@@ -341,7 +343,8 @@ int main()
             switch (event.type) {
             case SDL_QUIT: {
                 quit = 1;
-            } break;
+            }
+            break;
             }
         }
 
@@ -387,8 +390,10 @@ int main()
                            renderer,
                            x, y,
                            sw, sh,
-                           (SDL_Color) {255, 255, 255, 255},
-                           voidf_buffer);
+        (SDL_Color) {
+            255, 255, 255, 255
+        },
+        voidf_buffer);
 
         popups_render(renderer, &font);
 
