@@ -21,6 +21,7 @@
 #define BITMAP_FONT_ROW_SIZE    18
 #define BITMAP_FONT_CHAR_WIDTH  7
 #define BITMAP_FONT_CHAR_HEIGHT 9
+#define BITMAP_FONT_FOREGROUND ((SDL_Color) {255, 255, 255, 255})
 #define COUNTER_SWIDTH 30
 #define COUNTER_SHEIGHT 30
 #define COUNTER_HEIGHT (COUNTER_SWIDTH * BITMAP_FONT_CHAR_HEIGHT)
@@ -195,15 +196,18 @@ typedef struct {
 
 Popup popups[POPUPS_CAPACITY] = {0};
 
-void popups_render(SDL_Renderer *renderer, Bitmap_Font *font)
+void popups_render(SDL_Window *window, SDL_Renderer *renderer, Bitmap_Font *font)
 {
+    int window_width, window_height;
+    SDL_GetWindowSize(window, &window_width, &window_height);
+
     for (size_t i = 0; i < POPUPS_CAPACITY; ++i) {
         if (popups[i].a > 0.0) {
             int w = 0;
             int h = 0;
             bitmap_font_text_size(popups[i].text, POPUP_SWIDTH, POPUP_SHEIGHT, &w, &h);
-            const int x = SCREEN_WIDTH / 2 - w / 2;
-            const int y = SCREEN_HEIGHT / 2 - h / 2 - COUNTER_HEIGHT / 3 - (int) floorf((1.0 - popups[i].a * popups[i].a) * POPUP_FADEOUT_DISTANCE);
+            const int x = window_width / 2 - w / 2;
+            const int y = window_height / 2 - h / 2 - COUNTER_HEIGHT / 3 - (int) floorf((1.0 - popups[i].a * popups[i].a) * POPUP_FADEOUT_DISTANCE);
 
             SDL_Color color = POPUP_COLOR;
             color.a = (Uint8) floorf(255.0f * popups[i].a * popups[i].a);
@@ -357,10 +361,6 @@ int main()
         exit(1);
     }
 
-    SDL_RenderSetLogicalSize(renderer,
-                             (int) SCREEN_WIDTH,
-                             (int) SCREEN_HEIGHT);
-
     Bitmap_Font font = image_as_bitmap_font(renderer);
 
     int quit = 0;
@@ -385,7 +385,8 @@ int main()
                     undo_history_push(&voidf_undo_history, voidf_count);
                     voidf_count = 0;
                     popups_new("reset");
-                } break;
+                }
+                break;
 
                 case SDLK_z: {
                     if (event.key.keysym.mod & KMOD_CTRL) {
@@ -393,7 +394,8 @@ int main()
                             popups_new("undo");
                         }
                     }
-                } break;
+                }
+                break;
                 }
             }
             break;
@@ -431,23 +433,28 @@ int main()
 
         snprintf(voidf_buffer, sizeof(voidf_buffer), "%d", voidf_count);
 
+
         const int sw = 10 * 3;
         const int sh = 10 * 3;
+
         int w = 0;
         int h = 0;
         bitmap_font_text_size(voidf_buffer, sw, sh, &w, &h);
-        const int x = SCREEN_WIDTH / 2 - w / 2;
-        const int y = SCREEN_HEIGHT / 2 - h / 2;
-        bitmap_font_render(&font,
-                           renderer,
-                           x, y,
-                           sw, sh,
-        (SDL_Color) {
-            255, 255, 255, 255
-        },
-        voidf_buffer);
 
-        popups_render(renderer, &font);
+        int window_width, window_height;
+        SDL_GetWindowSize(window, &window_width, &window_height);
+
+        const int x = window_width / 2 - w / 2;
+        const int y = window_height / 2 - h / 2;
+        bitmap_font_render(
+            &font,
+            renderer,
+            x, y,
+            sw, sh,
+            BITMAP_FONT_FOREGROUND,
+            voidf_buffer);
+
+        popups_render(window, renderer, &font);
 
         SDL_Delay((int) floorf(DELTA_TIME * 1000.0f));
         SDL_RenderPresent(renderer);
