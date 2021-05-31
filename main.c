@@ -426,7 +426,7 @@ int main()
 
         popups_update(DELTA_TIME);
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 0x18, 0x18, 0x18, 0xFF);
         SDL_RenderClear(renderer);
 
         snprintf(voidf_buffer, sizeof(voidf_buffer), "%d", voidf_count);
