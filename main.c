@@ -257,27 +257,27 @@ size_t current_phrase = 0;
 // NOTE: if we will have more undo-able actions we may wanna replace this int with a specialized Undo_Action struct
 typedef int Undo_History_Item;
 
-#define UNDO_HISTORY_CAPACTIY 8
+#define UNDO_HISTORY_CAPACITY 256
 typedef struct {
-    Undo_History_Item items[UNDO_HISTORY_CAPACTIY];
+    Undo_History_Item items[UNDO_HISTORY_CAPACITY];
     size_t begin;
     size_t size;
 } Undo_History;
 
 void undo_history_push(Undo_History *uh, size_t value)
 {
-    uh->items[(uh->begin + uh->size) % UNDO_HISTORY_CAPACTIY] = value;
-    if (uh->size < UNDO_HISTORY_CAPACTIY) {
+    uh->items[(uh->begin + uh->size) % UNDO_HISTORY_CAPACITY] = value;
+    if (uh->size < UNDO_HISTORY_CAPACITY) {
         uh->size += 1;
     } else {
-        uh->begin = (uh->begin + 1) % UNDO_HISTORY_CAPACTIY;
+        uh->begin = (uh->begin + 1) % UNDO_HISTORY_CAPACITY;
     }
 }
 
 bool undo_history_pop(Undo_History *uh, int *value)
 {
     if (uh->size > 0) {
-        *value = uh->items[(uh->begin + uh->size - 1) % UNDO_HISTORY_CAPACTIY];
+        *value = uh->items[(uh->begin + uh->size - 1) % UNDO_HISTORY_CAPACITY];
         uh->size -= 1;
         return true;
     }
@@ -419,6 +419,7 @@ int main()
                             current_phrase = 0;
                         }
                         combo_timeout = 0.0f;
+                        undo_history_push(&voidf_undo_history, voidf_count);
                         voidf_count += 1;
 
                         switch (voidf_count) {
