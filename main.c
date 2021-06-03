@@ -385,7 +385,8 @@ int main()
                     undo_history_push(&voidf_undo_history, voidf_count);
                     voidf_count = 0;
                     popups_new("reset");
-                } break;
+                }
+                break;
 
                 case SDLK_z: {
                     if (event.key.keysym.mod & KMOD_CTRL) {
@@ -393,7 +394,8 @@ int main()
                             popups_new("undo");
                         }
                     }
-                } break;
+                }
+                break;
                 }
             }
             break;
@@ -418,7 +420,20 @@ int main()
                         }
                         combo_timeout = 0.0f;
                         voidf_count += 1;
-                        popups_new(combo_phrases[current_phrase]);
+
+                        switch (voidf_count) {
+                        case 69: {
+                            popups_new("NICE");
+                        }
+                        break;
+                        case 420: {
+                            popups_new("BLAZE IT");
+                        }
+                        break;
+                        default: {
+                            popups_new(combo_phrases[current_phrase]);
+                        }
+                        }
                     }
                 }
             }
