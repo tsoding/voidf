@@ -369,7 +369,7 @@ int main()
     Undo_History voidf_undo_history = {0};
     int voidf_count = 0;
     char voidf_buffer[1024];
-    float combo_timeout = 0.0f;
+    float combo_timeout = COMBO_PERIOD;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
